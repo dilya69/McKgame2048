@@ -405,29 +405,33 @@
   <header>
    <div class="brand">
   <img src="2048.png" alt="2048" class="game-logo">
-  <div class="brand-text">
-    <a href="https://t.me/+2fu6PZvvPrthODIy" id="tgLink" title="Разраб">
-      McKinley GameStore
-    </a>
+  
+</div>
+
+    <div class="header-right">
+  <div class="icon-row">
+    <button class="icon-btn" id="restartBtn" aria-label="Перезапустить" title="Новая игра">🔄</button>
+    <button class="icon-btn" id="pauseToggle" aria-label="Пауза" title="Пауза">⏸</button>
+    <button class="icon-btn" id="soundToggle" aria-label="Звук" title="Звук">🔊</button>
+    <button class="icon-btn" id="themeToggle" aria-label="Сменить тему" title="Сменить тему">☾</button>
+  </div>
+
+  <a href="https://t.me/+2fu6PZvvPrthODIy" id="tgLink" title="Разраб">
+    McKinley GameStore
+  </a>
+
+  <div class="scores">
+    <div class="score-box">
+      <p class="score-label">Счёт</p>
+      <p class="score-value" id="score">0</p>
+    </div>
+    <div class="score-box">
+      <p class="score-label">Рекорд</p>
+      <p class="score-value" id="best">0</p>
+    </div>
   </div>
 </div>
-    <div class="header-right">
-    <div class="icon-row">
-  <button class="icon-btn" id="restartBtn" aria-label="Перезапустить" title="Новая игра">🔄</button>
-  <button class="icon-btn" id="pauseToggle" aria-label="Пауза" title="Пауза">⏸</button>
-  <button class="icon-btn" id="soundToggle" aria-label="Звук" title="Звук">🔊</button>
-  <button class="icon-btn" id="themeToggle" aria-label="Сменить тему" title="Сменить тему">☾</button>
-</div>
-      <div class="scores">
-        <div class="score-box">
-          <p class="score-label">Счёт</p>
-          <p class="score-value" id="score">0</p>
-        </div>
-        <div class="score-box">
-          <p class="score-label">Рекорд</p>
-          <p class="score-value" id="best">0</p>
-        </div>
-      </div>
+    
     </div>
   </header>
 
