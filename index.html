@@ -88,42 +88,7 @@
   }
   h1 span { color: var(--accent); }
 
-  .subtitle {
-  margin: 6px 0 0;
-  max-width: 220px;
-}
 
-.subtitle a {
-  display: inline-flex;
-  align-items: center;
-  max-width: 100%;
-
-  padding: 6px 10px;
-
-  font-family: 'Inter', sans-serif;
-  font-size: 11.5px;
-  font-weight: 500;
-
-  color: var(--ink-dim);
-  text-decoration: none;
-
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 8px;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  transition: color 0.15s ease,
-              border-color 0.15s ease,
-              transform 0.15s ease;
-}
-
-.subtitle a:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}
 
 .subtitle a:active {
   transform: scale(0.97);
@@ -357,15 +322,62 @@
 
   display: block;
 }
-/* весь твой существующий CSS выше */
 
-#tgLink {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
+  /* Ссылка на канал в шапке */
+.header-channel {
+  display: block;
+  width: 100%;
   max-width: 190px;
   box-sizing: border-box;
+
+  margin-top: -2px;
+  padding: 5px 9px;
+
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+
+  background: var(--panel-bg);
+  color: var(--accent);
+
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+
+  text-align: center;
+  text-decoration: none;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  box-shadow: 0 2px 0 rgba(0,0,0,.15);
+
+  transition: background .15s ease, color .15s ease, transform .1s ease;
+}
+
+.header-channel:hover {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.header-channel:active {
+  transform: scale(.97);
+}
+
+
+/* Ссылка в паузе / проигрыше */
+.channel-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  width: 100%;
+  max-width: 220px;
+  box-sizing: border-box;
+
+  margin-top: 4px;
   padding: 6px 10px;
 
   border: 2px solid var(--accent);
@@ -374,30 +386,47 @@
   background: var(--panel-bg);
   color: var(--accent);
 
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   font-weight: 700;
   line-height: 1;
+
+  text-decoration: none;
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
-  text-decoration: none;
+  box-shadow: 0 2px 0 rgba(0,0,0,.15);
 
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
-
-  transition: transform .12s ease, background .12s ease;
+  transition: background .15s ease, color .15s ease, transform .1s ease;
 }
 
-#tgLink:hover {
+.channel-link:hover {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-fg);
 }
 
-#tgLink:active {
-  transform: scale(.96);
+.channel-link:active {
+  transform: scale(.97);
 }
 
+.channel-link img {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+
+  object-fit: cover;
+  border-radius: 7px;
+}
+
+.channel-link span {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+  
 </style>
 </head>
 <body>
@@ -416,9 +445,14 @@
     <button class="icon-btn" id="themeToggle" aria-label="Сменить тему" title="Сменить тему">☾</button>
   </div>
 
-  <a href="https://t.me/+2fu6PZvvPrthODIy" id="tgLink" title="Разраб">
-    McKinley GameStore
-  </a>
+  <a
+  class="header-channel"
+  href="https://t.me/+2fu6PZvvPrthODIy"
+  target="_blank"
+  rel="noopener"
+>
+  McKinley GameStore
+</a>
 
   <div class="scores">
     <div class="score-box">
@@ -430,7 +464,6 @@
       <p class="score-value" id="best">0</p>
     </div>
   </div>
-</div>
     
     </div>
   </header>
