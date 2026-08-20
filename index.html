@@ -357,6 +357,46 @@
 
   display: block;
 }
+/* весь твой существующий CSS выше */
+
+#tgLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  max-width: 190px;
+  box-sizing: border-box;
+  padding: 6px 10px;
+
+  border: 2px solid var(--accent);
+  border-radius: 9px;
+
+  background: var(--panel-bg);
+  color: var(--accent);
+
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  text-decoration: none;
+
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+
+  transition: transform .12s ease, background .12s ease;
+}
+
+#tgLink:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+#tgLink:active {
+  transform: scale(.96);
+}
 
 </style>
 </head>
@@ -366,7 +406,7 @@
    <div class="brand">
   <img src="2048.png" alt="2048" class="game-logo">
   <div class="brand-text">
-    <a href="https://t.me/+2fu6PZvvPrthODIy" id="tgLink" title="Телеграм-канал разраба">
+    <a href="https://t.me/+2fu6PZvvPrthODIy" id="tgLink" title="Разраб">
       McKinley GameStore
     </a>
   </div>
