@@ -136,25 +136,28 @@
   button.pill:active { transform: scale(0.96); }
 
   .board-frame {
-    position: relative;
-    background: var(--board-bg);
-    border-radius: 16px;
-    padding: 12px;
-    box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
-    /* Блокируем только на рамке игрового поля */
-    touch-action: none;
-  }
+  position: relative;
+  background: var(--board-bg);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
 
-  .board {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: 12px;
-    aspect-ratio: 1 / 1;
-    /* Блокируем только на доске */
-    touch-action: none;
-  }
+.board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 12px;
+  aspect-ratio: 1 / 1;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
   .cell-bg { background: var(--cell-empty); border-radius: 10px; }
 
@@ -426,6 +429,24 @@ let muted = false;
 let audioCtx = null;
 
 const boardEl = document.getElementById('board');
+
+  // ---------- Telegram Mini App: отключаем свайп вниз для закрытия ----------
+(function initTelegramSwipeProtection() {
+  try {
+    const tg = window.Telegram?.WebApp;
+    if (!tg) return;
+
+    tg.ready();
+
+    // Telegram Bot API 7.7+
+    if (typeof tg.disableVerticalSwipes === 'function') {
+      tg.disableVerticalSwipes();
+    }
+  } catch (e) {
+    console.warn('Telegram swipe protection unavailable:', e);
+  }
+})();
+  
 const tilesLayer = document.getElementById('tilesLayer');
 const scoreEl = document.getElementById('score');
 const bestEl = document.getElementById('best');
@@ -840,59 +861,120 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ---------- СВАЙПЫ ПО ИГРОВОМУ ПОЛЮ ----------
-let touchStartX = 0;
-let touchStartY = 0;
-let touchMoved = false;
+// ---------- ОБРАБОТКА СВАЙПОВ ----------
+// Используем Pointer Events + pointer capture.
+// Это надежнее touchstart/touchmove/touchend,
+// особенно внутри Telegram WebView.
 
-boardEl.addEventListener('touchstart', (e) => {
-  if (paused || over) return;
+const SWIPE_THRESHOLD = 30;
 
-  const touch = e.touches[0];
+let pointerStartX = 0;
+let pointerStartY = 0;
+let activePointerId = null;
+let pointerTracking = false;
+let pointerMoved = false;
 
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
-  touchMoved = false;
+boardEl.addEventListener('pointerdown', (e) => {
+  // Только основной палец/указатель
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+  // Не начинаем новый жест, пока старый не закончился
+  if (activePointerId !== null) return;
+
+  activePointerId = e.pointerId;
+  pointerStartX = e.clientX;
+  pointerStartY = e.clientY;
+  pointerTracking = true;
+  pointerMoved = false;
+
+  // Критически важно:
+  // после этого pointermove/pointerup остаются за board,
+  // даже если палец немного вышел за его границы.
+  try {
+    boardEl.setPointerCapture(e.pointerId);
+  } catch (_) {}
+
+  // Для свайпа по игре браузер/Telegram не должны
+  // воспринимать это как обычный scroll.
+  e.preventDefault();
 
   ensureAudio();
-}, { passive: true });
+}, { passive: false });
 
-boardEl.addEventListener('touchmove', (e) => {
-  if (paused || over) return;
+boardEl.addEventListener('pointermove', (e) => {
+  if (!pointerTracking || e.pointerId !== activePointerId) return;
 
-  const touch = e.touches[0];
+  const dx = e.clientX - pointerStartX;
+  const dy = e.clientY - pointerStartY;
 
-  const dx = touch.clientX - touchStartX;
-  const dy = touch.clientY - touchStartY;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) >= 8) {
+    pointerMoved = true;
+  }
 
-  // Как только палец реально двигается внутри игрового поля,
-  // полностью забираем жест себе.
-  if (Math.max(Math.abs(dx), Math.abs(dy)) > 8) {
+  // Пока палец движется внутри игрового жеста,
+  // не отдаём движение странице.
+  if (pointerMoved) {
     e.preventDefault();
-    touchMoved = true;
   }
 }, { passive: false });
 
-boardEl.addEventListener('touchend', (e) => {
-  if (paused || over || !touchMoved) return;
+function finishPointerSwipe(e) {
+  if (!pointerTracking || e.pointerId !== activePointerId) return;
 
-  const touch = e.changedTouches[0];
+  const dx = e.clientX - pointerStartX;
+  const dy = e.clientY - pointerStartY;
 
-  const dx = touch.clientX - touchStartX;
-  const dy = touch.clientY - touchStartY;
+  pointerTracking = false;
 
-  if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return;
+  try {
+    if (boardEl.hasPointerCapture(e.pointerId)) {
+      boardEl.releasePointerCapture(e.pointerId);
+    }
+  } catch (_) {}
 
+  activePointerId = null;
+
+  // Слишком маленькое движение — это не свайп.
+  if (
+    Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD
+  ) {
+    return;
+  }
+
+  // Определяем основное направление.
   if (Math.abs(dx) > Math.abs(dy)) {
     move(dx > 0 ? 'right' : 'left');
   } else {
     move(dy > 0 ? 'down' : 'up');
   }
+
+  e.preventDefault();
+}
+
+boardEl.addEventListener('pointerup', finishPointerSwipe, {
+  passive: false
+});
+
+boardEl.addEventListener('pointercancel', (e) => {
+  if (e.pointerId !== activePointerId) return;
+
+  pointerTracking = false;
+
+  try {
+    if (boardEl.hasPointerCapture(e.pointerId)) {
+      boardEl.releasePointerCapture(e.pointerId);
+    }
+  } catch (_) {}
+
+  activePointerId = null;
 }, { passive: false });
 
-  
-// НЕ БЛОКИРУЕМ свайпы на всей странице — оставляем как обычно
-// Это позволяет сворачивать игру свайпом вниз за пределами поля
+// Если браузер потерял pointer capture,
+// гарантированно сбрасываем состояние.
+boardEl.addEventListener('lostpointercapture', () => {
+  pointerTracking = false;
+  activePointerId = null;
+});
 
 document.getElementById('newGame').addEventListener('click', () => { ensureAudio(); initGame(); });
 document.getElementById('overlayRestart').addEventListener('click', () => {
