@@ -332,11 +332,10 @@
   </div>
 </div>
     <div class="header-right">
-     <div class="icon-row">
-  <button class="icon-btn" id="soundToggle" aria-label="Звук" title="Звук">🔊</button>
-
+    <div class="icon-row">
+  <button class="icon-btn" id="restartBtn" aria-label="Перезапустить" title="Новая игра">🔄</button>
   <button class="icon-btn" id="pauseToggle" aria-label="Пауза" title="Пауза">⏸</button>
-
+  <button class="icon-btn" id="soundToggle" aria-label="Звук" title="Звук">🔊</button>
   <button class="icon-btn" id="themeToggle" aria-label="Сменить тему" title="Сменить тему">☾</button>
 </div>
       <div class="scores">
@@ -862,14 +861,21 @@ boardEl.addEventListener('touchstart', (e) => {
   ensureAudio();
 }, { passive: true });
 
-
 boardEl.addEventListener('touchmove', (e) => {
   if (paused || over) return;
 
-  e.preventDefault();
-  touchMoved = true;
-}, { passive: false });
+  const touch = e.touches[0];
 
+  const dx = touch.clientX - touchStartX;
+  const dy = touch.clientY - touchStartY;
+
+  // Как только палец реально двигается внутри игрового поля,
+  // полностью забираем жест себе.
+  if (Math.max(Math.abs(dx), Math.abs(dy)) > 8) {
+    e.preventDefault();
+    touchMoved = true;
+  }
+}, { passive: false });
 
 boardEl.addEventListener('touchend', (e) => {
   if (paused || over || !touchMoved) return;
@@ -879,9 +885,7 @@ boardEl.addEventListener('touchend', (e) => {
   const dx = touch.clientX - touchStartX;
   const dy = touch.clientY - touchStartY;
 
-  if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) {
-    return;
-  }
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return;
 
   if (Math.abs(dx) > Math.abs(dy)) {
     move(dx > 0 ? 'right' : 'left');
@@ -890,44 +894,6 @@ boardEl.addEventListener('touchend', (e) => {
   }
 }, { passive: false });
 
-  // ---------- СВАЙП СВЕРХУ ДЛЯ ЗАКРЫТИЯ ----------
-const header = document.querySelector('header');
-
-let headerTouchStartY = 0;
-let headerTouchStartX = 0;
-
-header.addEventListener('touchstart', (e) => {
-  const touch = e.touches[0];
-
-  headerTouchStartX = touch.clientX;
-  headerTouchStartY = touch.clientY;
-}, { passive: true });
-
-
-header.addEventListener('touchend', (e) => {
-  const touch = e.changedTouches[0];
-
-  const dx = touch.clientX - headerTouchStartX;
-  const dy = touch.clientY - headerTouchStartY;
-
-  // Только вертикальный свайп вниз
-  if (
-    dy > 70 &&
-    Math.abs(dy) > Math.abs(dx)
-  ) {
-    try {
-      if (
-        window.Telegram &&
-        window.Telegram.WebApp &&
-        typeof window.Telegram.WebApp.close === 'function'
-      ) {
-        window.Telegram.WebApp.close();
-      }
-    } catch (err) {
-      console.error('Telegram close failed:', err);
-    }
-  }
-}, { passive: true });
   
 // НЕ БЛОКИРУЕМ свайпы на всей странице — оставляем как обычно
 // Это позволяет сворачивать игру свайпом вниз за пределами поля
