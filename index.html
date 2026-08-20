@@ -862,86 +862,49 @@ document.addEventListener('keydown', e => {
 });
 
 // ---------- ОБРАБОТКА СВАЙПОВ ----------
-// Используем Pointer Events + pointer capture.
-// Это надежнее touchstart/touchmove/touchend,
-// особенно внутри Telegram WebView.
+
+let touchStartX = 0;
+let touchStartY = 0;
+let touchTracking = false;
 
 const SWIPE_THRESHOLD = 30;
 
-let pointerStartX = 0;
-let pointerStartY = 0;
-let activePointerId = null;
-let pointerTracking = false;
-let pointerMoved = false;
+boardEl.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) return;
 
-boardEl.addEventListener('pointerdown', (e) => {
-  // Только основной палец/указатель
-  if (e.pointerType === 'mouse' && e.button !== 0) return;
-
-  // Не начинаем новый жест, пока старый не закончился
-  if (activePointerId !== null) return;
-
-  activePointerId = e.pointerId;
-  pointerStartX = e.clientX;
-  pointerStartY = e.clientY;
-  pointerTracking = true;
-  pointerMoved = false;
-
-  // Критически важно:
-  // после этого pointermove/pointerup остаются за board,
-  // даже если палец немного вышел за его границы.
-  try {
-    boardEl.setPointerCapture(e.pointerId);
-  } catch (_) {}
-
-  // Для свайпа по игре браузер/Telegram не должны
-  // воспринимать это как обычный scroll.
-  e.preventDefault();
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchTracking = true;
 
   ensureAudio();
-}, { passive: false });
+}, { passive: true });
 
-boardEl.addEventListener('pointermove', (e) => {
-  if (!pointerTracking || e.pointerId !== activePointerId) return;
+boardEl.addEventListener('touchmove', (e) => {
+  if (!touchTracking || e.touches.length !== 1) return;
 
-  const dx = e.clientX - pointerStartX;
-  const dy = e.clientY - pointerStartY;
+  const dx = e.touches[0].clientX - touchStartX;
+  const dy = e.touches[0].clientY - touchStartY;
 
   if (Math.max(Math.abs(dx), Math.abs(dy)) >= 8) {
-    pointerMoved = true;
-  }
-
-  // Пока палец движется внутри игрового жеста,
-  // не отдаём движение странице.
-  if (pointerMoved) {
     e.preventDefault();
   }
 }, { passive: false });
 
-function finishPointerSwipe(e) {
-  if (!pointerTracking || e.pointerId !== activePointerId) return;
+boardEl.addEventListener('touchend', (e) => {
+  if (!touchTracking) return;
 
-  const dx = e.clientX - pointerStartX;
-  const dy = e.clientY - pointerStartY;
+  touchTracking = false;
 
-  pointerTracking = false;
+  const touch = e.changedTouches[0];
+  if (!touch) return;
 
-  try {
-    if (boardEl.hasPointerCapture(e.pointerId)) {
-      boardEl.releasePointerCapture(e.pointerId);
-    }
-  } catch (_) {}
+  const dx = touch.clientX - touchStartX;
+  const dy = touch.clientY - touchStartY;
 
-  activePointerId = null;
-
-  // Слишком маленькое движение — это не свайп.
-  if (
-    Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD
-  ) {
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD) {
     return;
   }
 
-  // Определяем основное направление.
   if (Math.abs(dx) > Math.abs(dy)) {
     move(dx > 0 ? 'right' : 'left');
   } else {
@@ -949,34 +912,12 @@ function finishPointerSwipe(e) {
   }
 
   e.preventDefault();
-}
-
-boardEl.addEventListener('pointerup', finishPointerSwipe, {
-  passive: false
-});
-
-boardEl.addEventListener('pointercancel', (e) => {
-  if (e.pointerId !== activePointerId) return;
-
-  pointerTracking = false;
-
-  try {
-    if (boardEl.hasPointerCapture(e.pointerId)) {
-      boardEl.releasePointerCapture(e.pointerId);
-    }
-  } catch (_) {}
-
-  activePointerId = null;
 }, { passive: false });
 
-// Если браузер потерял pointer capture,
-// гарантированно сбрасываем состояние.
-boardEl.addEventListener('lostpointercapture', () => {
-  pointerTracking = false;
-  activePointerId = null;
+boardEl.addEventListener('touchcancel', () => {
+  touchTracking = false;
 });
 
-document.getElementById('newGame').addEventListener('click', () => { ensureAudio(); initGame(); });
 document.getElementById('overlayRestart').addEventListener('click', () => {
   ensureAudio();
   paused = false;
