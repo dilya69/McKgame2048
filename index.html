@@ -66,7 +66,7 @@
     display: flex;
     justify-content: center;
     padding: 32px 16px 60px;
-    /* НЕ блокируем свайп на всей странице — оставляем как обычно */
+  overscroll-behavior-y: none;
   }
 
   .wrap { width: 100%; max-width: 420px; }
@@ -358,14 +358,32 @@
 
   <div class="board-frame">
 
-  <div class="board" id="board">
+<div class="board" id="board">
 
-    <div class="cell-bg"></div>
-    ...
-    <div class="tiles-layer" id="tilesLayer"></div>
-    <div class="toast" id="toast"></div>
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
 
-  </div>
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+  <div class="cell-bg"></div>
+
+  <div class="tiles-layer" id="tilesLayer"></div>
+  <div class="toast" id="toast"></div>
+
+</div>
 
   <div class="overlay" id="overlay">
 
@@ -827,38 +845,44 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ---------- ОБРАБОТКА СВАЙПОВ (только на игровом поле) ----------
-let touchStartX = 0, touchStartY = 0;
+// ---------- СВАЙПЫ ПО ИГРОВОМУ ПОЛЮ ----------
+let touchStartX = 0;
+let touchStartY = 0;
 let touchMoved = false;
 
-// Начало касания на поле
 boardEl.addEventListener('touchstart', (e) => {
+  if (paused || over) return;
+
   const touch = e.touches[0];
+
   touchStartX = touch.clientX;
   touchStartY = touch.clientY;
   touchMoved = false;
+
   ensureAudio();
 }, { passive: true });
 
-// Движение пальца по полю — блокируем прокрутку
+
 boardEl.addEventListener('touchmove', (e) => {
-  // Запрещаем прокрутку страницы ТОЛЬКО когда палец на игровом поле
+  if (paused || over) return;
+
   e.preventDefault();
   touchMoved = true;
 }, { passive: false });
 
-// Завершение свайпа
+
 boardEl.addEventListener('touchend', (e) => {
-  if (!touchMoved) return;
-  
+  if (paused || over || !touchMoved) return;
+
   const touch = e.changedTouches[0];
+
   const dx = touch.clientX - touchStartX;
   const dy = touch.clientY - touchStartY;
-  
-  // Минимальная длина свайпа для регистрации
-  if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return;
-  
-  // Определяем направление
+
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) {
+    return;
+  }
+
   if (Math.abs(dx) > Math.abs(dy)) {
     move(dx > 0 ? 'right' : 'left');
   } else {
@@ -866,6 +890,45 @@ boardEl.addEventListener('touchend', (e) => {
   }
 }, { passive: false });
 
+  // ---------- СВАЙП СВЕРХУ ДЛЯ ЗАКРЫТИЯ ----------
+const header = document.querySelector('header');
+
+let headerTouchStartY = 0;
+let headerTouchStartX = 0;
+
+header.addEventListener('touchstart', (e) => {
+  const touch = e.touches[0];
+
+  headerTouchStartX = touch.clientX;
+  headerTouchStartY = touch.clientY;
+}, { passive: true });
+
+
+header.addEventListener('touchend', (e) => {
+  const touch = e.changedTouches[0];
+
+  const dx = touch.clientX - headerTouchStartX;
+  const dy = touch.clientY - headerTouchStartY;
+
+  // Только вертикальный свайп вниз
+  if (
+    dy > 70 &&
+    Math.abs(dy) > Math.abs(dx)
+  ) {
+    try {
+      if (
+        window.Telegram &&
+        window.Telegram.WebApp &&
+        typeof window.Telegram.WebApp.close === 'function'
+      ) {
+        window.Telegram.WebApp.close();
+      }
+    } catch (err) {
+      console.error('Telegram close failed:', err);
+    }
+  }
+}, { passive: true });
+  
 // НЕ БЛОКИРУЕМ свайпы на всей странице — оставляем как обычно
 // Это позволяет сворачивать игру свайпом вниз за пределами поля
 
