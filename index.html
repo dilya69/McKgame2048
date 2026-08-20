@@ -196,36 +196,149 @@
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-  .overlay {
-    position: absolute; inset: 0;
-    background: rgba(16,24,26,0.9);
-    border-radius: 16px;
-    display: none;
-    flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; gap: 12px;
-    z-index: 10;
-    padding: 20px;
-  }
-  :root[data-theme="light"] .overlay { background: rgba(244,239,225,0.94); }
-  .overlay.show { display: flex; }
-  .overlay h2 { font-family: 'Fraunces', serif; font-size: 28px; margin: 0; color: var(--ink); }
-  .overlay p { color: var(--ink-dim); margin: 0; font-size: 13.5px; }
+  .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.game-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 10px;
+  display: block;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-text a {
+  color: var(--ink-dim);
+  text-decoration: underline;
+  font-size: 12.5px;
+}
+
+.brand-text a:hover {
+  color: var(--accent);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  background: rgba(16,24,26,0.94);
+
+  border-radius: 16px;
+
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  gap: 14px;
+
+  z-index: 10;
+
+  padding: 24px;
+}
+
+:root[data-theme="light"] .overlay {
+  background: rgba(244,239,225,0.96);
+}
+
+.overlay.show {
+  display: flex;
+}
+
+.overlay h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  margin: 0;
+  color: var(--ink);
+}
+
+.overlay p {
+  color: var(--ink-dim);
+  margin: 0;
+  font-size: 13.5px;
+}
+
+.overlay-buttons {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 220px;
+  gap: 8px;
+}
+
+.overlay-buttons .pill {
+  width: 100%;
+}
+
+.secondary-pill {
+  background: var(--panel-bg) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--panel-border) !important;
+}
+
+.channel-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  margin-top: 8px;
+
+  color: var(--ink-dim);
+  text-decoration: none;
+
+  font-size: 12.5px;
+}
+
+.channel-link:hover {
+  color: var(--accent);
+}
+
+.channel-link img {
+  width: 34px;
+  height: 34px;
+
+  object-fit: cover;
+
+  border-radius: 9px;
+
+  display: block;
+}
 
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <h1>20<span>48</span></h1>
-      <p class="subtitle"><a href="https://t.me/+2fu6PZvvPrthODIy" id="tgLink" title="Телеграм-канал разраба">McKinley GameStore</a></p>
-    </div>
+   <div class="brand">
+  <img src="2048.png" alt="2048" class="game-logo">
+  <div class="brand-text">
+    <a href="https://t.me/+2fu6PZvvPrthODIy" id="tgLink" title="Телеграм-канал разраба">
+      McKinley GameStore
+    </a>
+  </div>
+</div>
     <div class="header-right">
-      <div class="icon-row">
-        <button class="icon-btn" id="soundToggle" aria-label="Звук" title="Звук">🔊</button>
-        <button class="icon-btn" id="themeToggle" aria-label="Сменить тему" title="Сменить тему">☾</button>
-      </div>
+     <div class="icon-row">
+  <button class="icon-btn" id="soundToggle" aria-label="Звук" title="Звук">🔊</button>
+
+  <button class="icon-btn" id="pauseToggle" aria-label="Пауза" title="Пауза">⏸</button>
+
+  <button class="icon-btn" id="themeToggle" aria-label="Сменить тему" title="Сменить тему">☾</button>
+</div>
       <div class="scores">
         <div class="score-box">
           <p class="score-label">Счёт</p>
@@ -244,21 +357,51 @@
   </div>
 
   <div class="board-frame">
-    <div class="board" id="board">
-      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
-      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
-      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
-      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
-      <div class="tiles-layer" id="tilesLayer"></div>
-      <div class="toast" id="toast"></div>
-      <div class="overlay" id="overlay">
-        <h2 id="overlayTitle">Игра окончена</h2>
-        <p id="overlaySubtitle">Больше нет ходов</p>
-        <button class="pill" id="overlayRestart">Попробовать снова</button>
-      </div>
-    </div>
+
+  <div class="board" id="board">
+
+    <div class="cell-bg"></div>
+    ...
+    <div class="tiles-layer" id="tilesLayer"></div>
+    <div class="toast" id="toast"></div>
+
   </div>
 
+  <div class="overlay" id="overlay">
+
+    <h2 id="overlayTitle">Игра окончена</h2>
+
+    <p id="overlaySubtitle">Больше нет ходов</p>
+
+    <div class="overlay-buttons">
+
+      <button class="pill" id="overlayContinue">
+        Продолжить
+      </button>
+
+      <button class="pill" id="overlayRestart">
+        Попробовать снова
+      </button>
+
+      <button class="pill secondary-pill" id="overlayExit">
+        Выйти
+      </button>
+
+    </div>
+
+    <a
+      class="channel-link"
+      href="https://t.me/+2fu6PZvvPrthODIy"
+      target="_blank"
+      rel="noopener"
+    >
+      <img src="avags.png" alt="Telegram">
+      <span>McKinley GameStore</span>
+    </a>
+
+  </div>
+
+</div>
 
 
 </div>
@@ -279,6 +422,12 @@ const overlaySubtitle = document.getElementById('overlaySubtitle');
 const toastEl = document.getElementById('toast');
 const soundBtn = document.getElementById('soundToggle');
 
+  const pauseBtn = document.getElementById('pauseToggle');
+const overlayContinue = document.getElementById('overlayContinue');
+const overlayExit = document.getElementById('overlayExit');
+
+let paused = false;
+
 const tileColors = {
   2: ['--t2-bg', '--t2-fg'], 4: ['--t4-bg', '--t4-fg'], 8: ['--t8-bg', '--t8-fg'],
   16: ['--t16-bg', '--t16-fg'], 32: ['--t32-bg', '--t32-fg'], 64: ['--t64-bg', '--t64-fg'],
@@ -298,6 +447,31 @@ function showToast(msg) {
   toastEl.classList.add('show');
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => toastEl.classList.remove('show'), 2000);
+}
+
+  function togglePause(force) {
+  if (over) return;
+
+  paused = typeof force === 'boolean'
+    ? force
+    : !paused;
+
+  if (paused) {
+    overlayTitle.textContent = 'Пауза';
+    overlaySubtitle.textContent = 'Игра приостановлена';
+
+    overlayContinue.style.display = 'block';
+    overlayRestart.style.display = 'block';
+    overlayExit.style.display = 'block';
+
+    overlay.classList.add('show');
+
+    pauseBtn.textContent = '▶';
+  } else {
+    overlay.classList.remove('show');
+
+    pauseBtn.textContent = '⏸';
+  }
 }
 
 // ---------- localStorage ----------
@@ -385,6 +559,36 @@ soundBtn.addEventListener('click', async () => {
   if (!muted) playTone(440, 0.08, 'sine', 0.08);
 });
 
+  pauseBtn.addEventListener('click', () => {
+  ensureAudio();
+
+  if (over) return;
+
+  togglePause();
+});
+
+  overlayContinue.addEventListener('click', () => {
+  ensureAudio();
+  togglePause(false);
+});
+
+  overlayExit.addEventListener('click', () => {
+  try {
+    if (
+      window.Telegram &&
+      window.Telegram.WebApp &&
+      typeof window.Telegram.WebApp.close === 'function'
+    ) {
+      window.Telegram.WebApp.close();
+      return;
+    }
+  } catch (e) {
+    console.error('Telegram close failed:', e);
+  }
+
+  showToast('Доступно внутри Telegram');
+});
+
 // ---------- Theme ----------
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -434,7 +638,9 @@ function initGame() {
   tileId = 0;
   score = 0;
   over = false;
+  paused = false;
   reached2048 = false;
+  pauseBtn.textContent = '⏸';
   overlay.classList.remove('show');
   scoreEl.textContent = 0;
   addRandomTile();
@@ -511,7 +717,7 @@ function cloneGridValues() {
 }
 
 function move(direction) {
-  if (over) return;
+  if (over || paused) return;
   const before = cloneGridValues();
   let anyMerge = false;
   let mergedValue = 0;
@@ -595,10 +801,20 @@ function checkGameState() {
     }
   }
 
-  over = true;
+   over = true;
+  paused = false;
+
+  pauseBtn.textContent = '⏸';
+
   overlayTitle.textContent = 'Игра окончена';
   overlaySubtitle.textContent = 'Больше нет ходов — счёт: ' + score;
+
+  overlayContinue.style.display = 'none';
+  overlayRestart.style.display = 'block';
+  overlayExit.style.display = 'block';
+
   overlay.classList.add('show');
+
   soundGameOver();
 }
 
@@ -654,7 +870,12 @@ boardEl.addEventListener('touchend', (e) => {
 // Это позволяет сворачивать игру свайпом вниз за пределами поля
 
 document.getElementById('newGame').addEventListener('click', () => { ensureAudio(); initGame(); });
-document.getElementById('overlayRestart').addEventListener('click', () => { ensureAudio(); initGame(); });
+document.getElementById('overlayRestart').addEventListener('click', () => {
+  ensureAudio();
+  paused = false;
+  pauseBtn.textContent = '⏸';
+  initGame();
+});
 window.addEventListener('resize', render);
 
 (async function start() {
